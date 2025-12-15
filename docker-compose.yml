@@ -1,0 +1,6 @@
+services:
+  pos_tranviettralam_fresher_api:
+    image: ${DOCKER_REGISTRY-}postranviettralamfresherapi
+    build:
+      context: .
+      dockerfile: POS_TranVietTraLam_Fresher_API/Dockerfile
