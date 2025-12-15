@@ -8,13 +8,16 @@ namespace POS_TranVietTraLam_Fresher_DAL.Implements
         private readonly POSContext _context;
         public IUserRepository UserRepository { get; }
         public IOTPRepository OTPRepository { get; }
+        public ICategoryRepository CategoryRepository { get; }
         public UnitOfWork(POSContext context, 
             IUserRepository userRepository,
-            IOTPRepository oTPRepository)
+            IOTPRepository oTPRepository,
+            ICategoryRepository categoryRepository)
         {
             _context = context;
             UserRepository = userRepository;
             OTPRepository = oTPRepository;
+            CategoryRepository = categoryRepository;
         }
         public async Task<bool> Save()
         {
