@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="global.json" />
+  </Folder>
+  <Project Path="POS_TranVietTraLam_Fresher_API/POS_TranVietTraLam_Fresher_API.csproj" />
+  <Project Path="POS_TranVietTraLam_Fresher_BLL/POS_TranVietTraLam_Fresher_BLL.csproj" />
+  <Project Path="POS_TranVietTraLam_Fresher_DAL/POS_TranVietTraLam_Fresher_DAL.csproj" />
+  <Project Path="POS_TranVietTraLam_Fresher_Entities/POS_TranVietTraLam_Fresher_Entities.csproj" />
+</Solution>
