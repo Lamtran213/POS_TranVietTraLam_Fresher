@@ -33,7 +33,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
             await _unitOfWork.CartRepository.AddAsync(new Cart
             {
                 UserId = userId,
-                CreatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow
             });
             return await _unitOfWork.Save();
         }
