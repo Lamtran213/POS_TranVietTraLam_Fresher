@@ -5,9 +5,8 @@ namespace POS_TranVietTraLam_Fresher_BLL.Defines
 {
     public interface IJwtService
     {
-        string GenerateAccessToken(User user);
-        string GenerateRefreshToken(User user);
+        string GenerateAccessToken(User user, int expirationMinutes = 1440);
+        string GenerateRefreshToken(User user, int expirationMinutes = 10080);
         ClaimsPrincipal? ValidateRefreshToken(string refreshToken);
-        string? GetUserIdFromRefreshToken(string refreshToken);
     }
 }
