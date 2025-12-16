@@ -42,7 +42,8 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
             var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-            new Claim(ClaimTypes.Email, user.Email)
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role)
         };
 
             return GenerateToken(
@@ -54,6 +55,11 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
 
         private string GenerateToken(List<Claim> claims, string secretKey, int expirationMinutes)
         {
+            _logger.LogInformation("Generating JWT");
+            _logger.LogInformation("Secret key length: {Len}", secretKey?.Length);
+            _logger.LogInformation("Claims: {Claims}",
+                string.Join(", ", claims.Select(c => $"{c.Type}:{c.Value}")));
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -65,8 +71,11 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 signingCredentials: credentials
             );
 
+            _logger.LogInformation("JWT generated successfully, exp in {Minutes} minutes", expirationMinutes);
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
 
         public ClaimsPrincipal? ValidateRefreshToken(string refreshToken)
         {

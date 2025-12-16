@@ -5,6 +5,8 @@
         IUserRepository UserRepository { get; }
         IOTPRepository OTPRepository { get; }
         ICategoryRepository CategoryRepository { get; }
+        IProductRepository ProductRepository { get; }
+        ICartRepository CartRepository { get; }
         Task<bool> Save();
     }
 }

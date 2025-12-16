@@ -1,0 +1,20 @@
+﻿using POS_TranVietTraLam_Fresher_DAL.Context;
+using POS_TranVietTraLam_Fresher_DAL.Defines;
+using POS_TranVietTraLam_Fresher_Entities.Entity;
+
+namespace POS_TranVietTraLam_Fresher_DAL.Implements
+{
+    public class ProductRepository : GenericRepository<Product>, IProductRepository
+    {
+        private readonly POSContext _context;
+        public ProductRepository(POSContext context) : base(context)
+        {
+            _context = context;
+        }
+
+        public IQueryable<Product> Query()
+        {
+            return _context.Products.AsQueryable();
+        }
+    }
+}
