@@ -200,5 +200,59 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
+
+        public async Task<LoginResponseDTO> GoogleLoginAsync(GoogleLoginRequestDTO request)
+        {
+            var existingUser = await _unitOfWork.UserRepository.GetBySupabaseUserIdAsync(request.Uid);
+
+            User user;
+
+            if (existingUser != null)
+            {
+                user = existingUser;
+                _logger.LogInformation("Google login for existing user: {Email}", request.Email);
+            }
+            else
+            {
+                var userByEmail = await _unitOfWork.UserRepository.GetByEmailAsync(request.Email);
+
+                if (userByEmail != null)
+                {
+                    throw new InvalidOperationException("Email đã được sử dụng để đăng ký. Vui lòng đăng nhập bằng email/password hoặc sử dụng email khác để đăng nhập Google.");
+                }
+                else
+                {
+                    user = new User
+                    {
+                        UserId = Guid.NewGuid(),
+                        Email = request.Email,
+                        PasswordHash = "",
+                        Role = "User",
+                        IsActive = 1,
+                        CreatedAt = request.CreatedAt,
+                        SupabaseUserId = request.Uid
+                    };
+
+                    await _unitOfWork.UserRepository.AddAsync(user);
+                    await _unitOfWork.Save();
+
+                    _logger.LogInformation("Created new user from Google login: {Email}", request.Email);
+                }
+            }
+
+            if (user.IsActive != 1)
+            {
+                throw new UnauthorizedAccessException(AuthMessage.LOGIN_USER_NOT_ACTIVE);
+            }
+
+            var accessToken = _jwtService.GenerateAccessToken(user);
+            var refreshToken = _jwtService.GenerateRefreshToken(user);
+
+            return new LoginResponseDTO
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
+        }
     }
 }

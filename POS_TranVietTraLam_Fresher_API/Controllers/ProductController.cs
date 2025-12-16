@@ -9,7 +9,6 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -18,6 +17,7 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
             _productService = productService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ApiResponse<AddProductResponse>> AddProduct([FromBody] AddProductRequest addProductRequest)
         {
