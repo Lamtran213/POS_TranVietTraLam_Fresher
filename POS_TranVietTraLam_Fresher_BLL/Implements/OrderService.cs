@@ -1,4 +1,6 @@
-﻿using POS_TranVietTraLam_Fresher_BLL.Defines;
+﻿using Microsoft.Extensions.Options;
+using POS_TranVietTraLam_Fresher_BLL.Defines;
+using POS_TranVietTraLam_Fresher_BLL.DTO.CommonDTO;
 using POS_TranVietTraLam_Fresher_BLL.DTO.OrderDTO;
 using POS_TranVietTraLam_Fresher_DAL.Defines;
 using POS_TranVietTraLam_Fresher_Entities.Entity;
@@ -12,11 +14,13 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
         private readonly IAuthenticatedUser _authenticatedUser;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPayosService _payosService;
-        public OrderService(IAuthenticatedUser authenticatedUser, IUnitOfWork unitOfWork, IPayosService payosService)
+        private readonly PayOSSettings _payosSettings;
+        public OrderService(IAuthenticatedUser authenticatedUser, IUnitOfWork unitOfWork, IPayosService payosService, IOptions<PayOSSettings> payOSSettings)
         {
             _authenticatedUser = authenticatedUser;
             _unitOfWork = unitOfWork;
             _payosService = payosService;
+            _payosSettings = payOSSettings.Value;
         }
         private OrderResponseDTO MapOrderToDto(Order o)
         {
@@ -120,8 +124,8 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                     OrderCode = payment.PaymentId,
                     Amount = order.TotalAmount,
                     Description = $"Thanh toán đơn hàng #{order.OrderId}",
-                    ReturnUrl = "http://localhost:5173/payment/success",
-                    CancelUrl = "http://localhost:5173/payment/cancel",
+                    ReturnUrl = _payosSettings.ReturnUrl,
+                    CancelUrl = _payosSettings.CancelUrl,
                     Items = order.OrderDetails.Select(d => new PayOSItem
                     {
                         Name = d.Product!.ProductName,
