@@ -13,14 +13,26 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ProductService> _logger;
-        public ProductService(IUnitOfWork unitOfWork, ILogger<ProductService> logger)
+        private readonly IStorageService _storageService;
+        public ProductService(IUnitOfWork unitOfWork, ILogger<ProductService> logger, IStorageService storageService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _storageService = storageService;
         }
 
         public async Task<AddProductResponse> AddProductAsync(AddProductRequest addProductRequest)
         {
+            string imageUrl = null;
+
+            if (addProductRequest.ImageUrl != null && addProductRequest.ImageUrl.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(addProductRequest.ImageUrl.FileName)}";
+
+                await using var stream = addProductRequest.ImageUrl.OpenReadStream();
+                imageUrl = await _storageService.UploadFileAsync(fileName, stream);
+            }
+
             var product = new Product
             {
                 ProductName = addProductRequest.ProductName,
@@ -28,12 +40,14 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 UnitPrice = addProductRequest.UnitPrice,
                 UnitsInStock = addProductRequest.UnitsInStock,
                 CategoryId = addProductRequest.CategoryId,
-                ImageUrl = addProductRequest.ImageUrl,
+                ImageUrl = imageUrl, 
                 Discount = addProductRequest.Discount,
                 IsActive = addProductRequest.IsActive
             };
+
             await _unitOfWork.ProductRepository.AddAsync(product);
             await _unitOfWork.Save();
+
             return new AddProductResponse
             {
                 ProductId = product.ProductId,
@@ -47,6 +61,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 IsActive = product.IsActive
             };
         }
+
         public async Task<PagedResult<GetProductResponse>> GetAllProductsAsync(
             int pageIndex,
             int pageSize)

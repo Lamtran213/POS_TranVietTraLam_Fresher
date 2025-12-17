@@ -17,9 +17,10 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
             _productService = productService;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Manager")]
         [HttpPost]
-        public async Task<ApiResponse<AddProductResponse>> AddProduct([FromBody] AddProductRequest addProductRequest)
+        [Consumes("multipart/form-data")]
+        public async Task<ApiResponse<AddProductResponse>> AddProduct([FromForm] AddProductRequest addProductRequest)
         {
             try
             {
