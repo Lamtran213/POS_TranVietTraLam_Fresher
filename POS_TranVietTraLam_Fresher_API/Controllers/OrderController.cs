@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
 using POS_TranVietTraLam_Fresher_BLL.DTO.OrderDTO;
 using POS_TranVietTraLam_Fresher_Entities.Enum;
@@ -20,6 +21,7 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
             _authenticatedUser = authenticatedUser;
         }
 
+        [Authorize(Roles = "User")]
         [HttpGet("orders-by-user")]
         public async Task<ActionResult<IEnumerable<OrderResponseDTO?>>> GetByUserId()
         {
@@ -107,7 +109,7 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
         [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<OrderResponseDTO>>> GetAllOrders(
             [FromQuery] DateTime? orderDate,
-            [FromQuery] OrderStatus status = OrderStatus.All,
+            [FromQuery] OrderStatus? status,
             [FromQuery] int pageIndex = 0,
             [FromQuery] int pageSize = 10)
         {

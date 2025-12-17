@@ -51,5 +51,13 @@ namespace POS_TranVietTraLam_Fresher_DAL.Implements
             entity.Status = PaymentStatus.Failed;
             await _context.SaveChangesAsync();
         }
+
+        public async Task<string> GetEmailByUserIdAsync(Guid userId)
+        {
+            var payment = await _dbSet.AsNoTracking()
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+            return payment?.User.Email ?? string.Empty;
+        }
     }
 }

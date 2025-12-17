@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
+using POS_TranVietTraLam_Fresher_BLL.DTO.PaymentDTO;
 using POS_TranVietTraLam_Fresher_BLL.DTO.ProductDTO;
 using POS_TranVietTraLam_Fresher_BLL.Pagination;
 using POS_TranVietTraLam_Fresher_DAL.Defines;

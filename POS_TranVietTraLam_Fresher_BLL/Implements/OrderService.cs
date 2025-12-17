@@ -205,7 +205,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
         }
 
         public async Task<IEnumerable<OrderResponseDTO>> GetAllOrders(DateTime orderDate,
-            OrderStatus status, int pageIndex, int pageSize)
+            OrderStatus? status, int pageIndex, int pageSize)
         {
             var orders = await _unitOfWork.OrderRepository.GetAllWithDetailsAsync();
             if (orderDate != DateTime.MinValue)
@@ -215,7 +215,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
 
             if (status != OrderStatus.All)
             {
-                //orders = orders.Where(o => o.Status == (int)status);
+                orders = orders.Where(o => o.OrderStatus == status);
             }
 
             var paginatedOrders = orders.Skip(pageIndex * pageSize).Take(pageSize);

@@ -97,5 +97,22 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
 
             return false;
         }
+
+        public async Task<List<AllPaymentDTO>> GetAllPaymentAsync()
+        {
+            var payments = await _unitOfWork.PaymentRepository.GetAllWithDetailsAsync();
+            var paymentDTOs = payments.Select(p => new AllPaymentDTO
+            {
+                PaymentId = p.PaymentId,
+                PayosOrderCode = p.PayosOrderCode,
+                Amount = p.Amount,
+                Status = p.Status,
+                Method = p.Method,
+                CreatedAt = p.CreatedAt,
+                PaidAt = p.PaidAt,
+                Email = p.User.Email
+            }).ToList();
+            return paymentDTOs;
+        }
     }
 }

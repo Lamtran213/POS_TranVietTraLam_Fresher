@@ -14,5 +14,6 @@ namespace POS_TranVietTraLam_Fresher_DAL.Defines
         Task MarkPaidAsync(int paymentId, DateTimeOffset paidAt);
         Task MarkFailedAsync(int paymentId);
         Task<List<Payment>> GetPaidPaymentsWithDetailsAsync();
+        Task<string> GetEmailByUserIdAsync(Guid userId);
     }
 }

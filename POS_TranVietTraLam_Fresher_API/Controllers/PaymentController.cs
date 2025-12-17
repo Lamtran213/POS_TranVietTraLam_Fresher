@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
+using POS_TranVietTraLam_Fresher_BLL.DTO.CommonDTO;
 using POS_TranVietTraLam_Fresher_BLL.DTO.PaymentDTO;
 
 namespace POS_TranVietTraLam_Fresher_API.Controllers
@@ -85,6 +86,19 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
                 Console.WriteLine($"Webhook {Request.Method} error: {ex.Message}");
                 return BadRequest(new { success = false, message = ex.Message });
             }
+        }
+
+        [Authorize(Roles = "Manager")]
+        [HttpGet("all-payments")]
+        public async Task<ApiResponse<List<AllPaymentDTO>>> GetAllPaymentsAsync()
+        {
+            var payments = await _paymentService.GetAllPaymentAsync();
+            return new ApiResponse<List<AllPaymentDTO>>
+            {
+                Success = true,
+                Data = payments,
+                Message = "Retrieved all payments successfully"
+            };
         }
     }
 }

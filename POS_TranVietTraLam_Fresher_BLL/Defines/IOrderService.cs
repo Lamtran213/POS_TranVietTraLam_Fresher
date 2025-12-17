@@ -11,7 +11,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Defines
         Task<bool> UpdateStatusOrder(int orderId, OrderStatus status);
         Task<string> GetCustomerEmailByMemberId(Guid memberId);
         Task<IEnumerable<OrderResponseDTO>> GetAllOrders(DateTime orderDate,
-            OrderStatus status, int pageIndex, int pageSize);
+            OrderStatus? status, int pageIndex, int pageSize);
 
         Task<int> CountOrders(DateTime orderDate, OrderStatus status);
     }
