@@ -20,5 +20,6 @@ namespace POS_TranVietTraLam_Fresher_Entities.Entity
         public string? SupabaseUserId { get; set; }
         public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
         public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+        public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }

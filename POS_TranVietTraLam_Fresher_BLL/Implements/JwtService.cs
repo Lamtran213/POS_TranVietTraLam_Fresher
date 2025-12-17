@@ -71,7 +71,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
 
             try
             {
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_refreshSecret)); // <-- sửa tên biến
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_refreshSecret)); 
                 var tokenHandler = new JwtSecurityTokenHandler();
 
                 var principal = tokenHandler.ValidateToken(refreshToken, new TokenValidationParameters

@@ -41,5 +41,6 @@ namespace POS_TranVietTraLam_Fresher_Entities.Entity
         public virtual User Users { get; set; } = null!;
         [InverseProperty("Order")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }

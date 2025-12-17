@@ -6,7 +6,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Defines
     public interface IOrderService
     {
         Task<IEnumerable<OrderResponseDTO?>> GetByUserId(Guid userId);
-        Task<int> CreateOrderFromCart(decimal freight, decimal totalAmount, List<int> cartItemIds, string? address = null, int? voucherId = null);
+        Task<CreateOrderResponseDTO> CreateOrderFromCart(CreateOrderRequestDTO request);
         Task<OrderResponseDTO> GetById(int orderId);
         Task<bool> UpdateStatusOrder(int orderId, OrderStatus status);
         Task<string> GetCustomerEmailByMemberId(Guid memberId);

@@ -2,8 +2,10 @@
 using Microsoft.Extensions.Options;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
 using POS_TranVietTraLam_Fresher_BLL.DTO.CommonDTO;
+using POS_TranVietTraLam_Fresher_Entities.Entity;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -75,6 +77,84 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                     Message = $"Error sending email: {ex.Message}",
                     Data = false
                 };
+            }
+        }
+
+        public string BuildPaymentSuccessEmailHtml(
+            User user,
+            int? orderCode,
+            decimal amount,
+            DateTime createdAt,
+            DateTime paidAt
+            )
+        {
+            // Tìm template trong thư mục project, không phải bin/Debug
+            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var projectRoot = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", ".."));
+            var templatePath = Path.Combine(projectRoot, "POS_TranVietTraLam_Fresher_BLL", "Templates", "PaymentSuccessEmailTemplate.html");
+
+            // Fallback: tìm trong thư mục hiện tại
+            if (!File.Exists(templatePath))
+            {
+                templatePath = Path.Combine(baseDirectory, "Templates", "PaymentSuccessEmailTemplate.html");
+            }
+
+            // Fallback cuối: tìm trong thư mục BLL
+            if (!File.Exists(templatePath))
+            {
+                var bllPath = Path.Combine(projectRoot, "POS_TranVietTraLam_Fresher_BLL", "Templates", "PaymentSuccessEmailTemplate.html");
+                if (File.Exists(bllPath))
+                {
+                    templatePath = bllPath;
+                }
+            }
+
+            Console.WriteLine($"Looking for template at: {templatePath}");
+            Console.WriteLine($"Template exists: {File.Exists(templatePath)}");
+
+            var html = File.ReadAllText(templatePath);
+
+            var vi = new CultureInfo("vi-VN");
+            var amountVnd = string.Format(vi, "{0:C0}", amount);
+
+            // Chuyển thời gian UTC sang giờ Việt Nam (UTC+7)
+            var createdAtVN = ConvertUtcToVietnamTime(createdAt);
+            var paidAtVN = ConvertUtcToVietnamTime(paidAt);
+
+            html = html
+                .Replace("{UserName}", $"{(user.Email ?? string.Empty)}".Trim())
+                .Replace("{Amount}", amountVnd)
+                .Replace("{OrderCode}", orderCode.ToString())
+                .Replace("{CreatedAt}", createdAtVN.ToString("HH:mm dd/MM/yyyy"))
+                .Replace("{PaidAt}", paidAtVN.ToString("HH:mm dd/MM/yyyy"))
+                .Replace("{Year}", DateTime.Now.Year.ToString());
+
+            return html;
+        }
+
+        private static DateTime ConvertUtcToVietnamTime(DateTime utcDateTime)
+        {
+            if (utcDateTime.Kind != DateTimeKind.Utc)
+            {
+                utcDateTime = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
+            }
+
+            try
+            {
+                var tz = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, tz);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                try
+                {
+                    var tz = TimeZoneInfo.FindSystemTimeZoneById("Asia/Bangkok");
+                    return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, tz);
+                }
+                catch
+                {
+                    return utcDateTime.AddHours(7);
+                }
             }
         }
     }

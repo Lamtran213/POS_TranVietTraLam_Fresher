@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using POS_TranVietTraLam_Fresher_Entities.Entity;
+using POS_TranVietTraLam_Fresher_Entities.Enum;
 
 namespace POS_TranVietTraLam_Fresher_DAL.Context
 {
@@ -18,6 +19,7 @@ namespace POS_TranVietTraLam_Fresher_DAL.Context
         public DbSet<Product> Products { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -114,6 +116,47 @@ namespace POS_TranVietTraLam_Fresher_DAL.Context
                 .HasIndex(o => new { o.Email, o.Purpose })
                 .IsUnique()
                 .HasFilter("\"IsUsed\" = FALSE");
+            modelBuilder.Entity<Payment>(entity =>
+            {
+                entity.HasKey(p => p.PaymentId);
+
+                entity.Property(p => p.Amount)
+                      .HasColumnType("numeric(18,2)")
+                      .IsRequired();
+
+                entity.Property(p => p.Status)
+                      .HasConversion<string>()
+                      .HasMaxLength(50)
+                      .IsRequired();
+
+                entity.Property(p => p.Method)
+                      .HasConversion<int>()      // enum -> int
+                      .IsRequired();
+
+                entity.Property(p => p.PayosOrderCode)
+                      .IsRequired(false);        
+
+                entity.Property(p => p.CreatedAt)
+                      .HasDefaultValueSql("NOW()")
+                      .IsRequired();
+
+                entity.Property(p => p.PaidAt)
+                      .IsRequired(false);
+
+                entity.HasIndex(p => p.PayosOrderCode)
+                      .IsUnique();
+
+                entity.HasOne(p => p.User)
+                      .WithMany(u => u.Payments)
+                      .HasForeignKey(p => p.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.Order)
+                      .WithMany(o => o.Payments)
+                      .HasForeignKey(p => p.OrderId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
         }
     }
 }

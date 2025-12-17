@@ -3,6 +3,7 @@ using POS_TranVietTraLam_Fresher_BLL.DTO.OrderDTO;
 using POS_TranVietTraLam_Fresher_DAL.Defines;
 using POS_TranVietTraLam_Fresher_Entities.Entity;
 using POS_TranVietTraLam_Fresher_Entities.Enum;
+using static POS_TranVietTraLam_Fresher_BLL.DTO.PayosDTO.PayosDTOs;
 
 namespace POS_TranVietTraLam_Fresher_BLL.Implements
 {
@@ -10,10 +11,12 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
     {
         private readonly IAuthenticatedUser _authenticatedUser;
         private readonly IUnitOfWork _unitOfWork;
-        public OrderService(IAuthenticatedUser authenticatedUser, IUnitOfWork unitOfWork)
+        private readonly IPayosService _payosService;
+        public OrderService(IAuthenticatedUser authenticatedUser, IUnitOfWork unitOfWork, IPayosService payosService)
         {
             _authenticatedUser = authenticatedUser;
             _unitOfWork = unitOfWork;
+            _payosService = payosService;
         }
         private OrderResponseDTO MapOrderToDto(Order o)
         {
@@ -62,48 +65,92 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
             return result;
         }
 
-        public async Task<int> CreateOrderFromCart(decimal freight, decimal totalAmount, List<int> cartItemIds, string? address = null, int? voucherId = null)
+        public async Task<CreateOrderResponseDTO> CreateOrderFromCart(CreateOrderRequestDTO request)
         {
-            var cartItems = await _unitOfWork.CartItemRepository.GetByListIdsAsync(cartItemIds);
-            var newOrder = new Order
+            var cartItems = await _unitOfWork.CartItemRepository
+                .GetByListIdsAsync(request.CartItemIds);
+
+            if (!cartItems.Any())
+                throw new InvalidOperationException("Cart is empty");
+
+            var isOnlinePayment = request.PaymentMethod == PaymentMethod.PayOS;
+
+            var order = new Order
             {
                 UserId = _authenticatedUser.UserId,
                 OrderDate = DateTime.UtcNow,
                 RequiredDate = DateTime.UtcNow.AddDays(5),
-                Freight = freight,
-                TotalAmount = totalAmount,
-                IsPaid = true,
-                OrderStatus = (OrderStatus)(int)OrderStatus.Paid,
-                Address = address,
+                Freight = request.Freight,
+                TotalAmount = request.TotalAmount,
+                IsPaid = false, 
+                OrderStatus = OrderStatus.Pending,
+                Address = request.Address,
                 OrderDetails = cartItems.Select(ci => new OrderDetail
                 {
                     ProductId = ci.ProductId,
-                    UnitPrice = ci.Product?.UnitPrice ?? 0m,
+                    UnitPrice = (decimal)ci.Product!.UnitPrice,
                     Quantity = ci.Quantity,
-                    Discount = ci.Product?.Discount ?? 0
+                    Discount = ci.Product.Discount
                 }).ToList()
             };
 
-            await _unitOfWork.OrderRepository.CreateNewOrder(newOrder);
+            await _unitOfWork.OrderRepository.AddAsync(order);
+            await _unitOfWork.Save();
 
-            await _unitOfWork.CartItemRepository.DeleteByListIdsAsync(cartItemIds);
-            foreach (var item in newOrder.OrderDetails)
+            // ===== CREATE PAYMENT =====
+            var payment = new Payment
+            {
+                OrderId = order.OrderId,
+                UserId = order.UserId,
+                Amount = order.TotalAmount,
+                Method = request.PaymentMethod,
+                Status = PaymentStatus.Pending
+            };
+
+            await _unitOfWork.PaymentRepository.AddAsync(payment);
+            await _unitOfWork.Save();
+
+            // ===== PAYOS =====
+            PayOSPaymentResponse? payosResponse = null;
+
+            if (isOnlinePayment)
+            {
+                payosResponse = await _payosService.CreatePaymentLinkAsync(new CreatePayOSPaymentRequest
+                {
+                    OrderCode = payment.PaymentId,
+                    Amount = order.TotalAmount,
+                    Description = $"Thanh toán đơn hàng #{order.OrderId}",
+                    ReturnUrl = "http://localhost:5173/payment/success",
+                    CancelUrl = "http://localhost:5173/payment/cancel",
+                    Items = order.OrderDetails.Select(d => new PayOSItem
+                    {
+                        Name = d.Product!.ProductName,
+                        Quantity = d.Quantity,
+                        Price = d.UnitPrice
+                    }).ToList()
+                });
+
+                payment.PayosOrderCode = payosResponse.OrderCode;
+                await _unitOfWork.PaymentRepository.UpdateAsync(payment);
+            }
+
+            // ===== DELETE CART & UPDATE STOCK =====
+            await _unitOfWork.CartItemRepository.DeleteByListIdsAsync(request.CartItemIds);
+
+            foreach (var item in order.OrderDetails)
             {
                 var product = await _unitOfWork.ProductRepository.GetByIdAsync(item.ProductId);
-                if (product != null)
-                {
-                    product.UnitsInStock -= item.Quantity;
-                    await _unitOfWork.ProductRepository.UpdateAsync(product);
-                }
+                product!.UnitsInStock -= item.Quantity;
+                await _unitOfWork.ProductRepository.UpdateAsync(product);
             }
 
-            var saveResult = await _unitOfWork.Save();
-            if (!saveResult || newOrder.OrderId == 0)
+            await _unitOfWork.Save();
+
+            return new CreateOrderResponseDTO
             {
-                return 0;
-            }
-
-            return newOrder.OrderId;
+                OrderId = order.OrderId,
+                PaymentUrl = payosResponse?.CheckoutUrl
+            };
         }
 
         public async Task<OrderResponseDTO> GetById(int orderId)

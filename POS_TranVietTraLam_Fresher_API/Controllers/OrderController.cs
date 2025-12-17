@@ -52,22 +52,22 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult> CreateOrderFromCart([FromBody] CreateOrderRequestDTO orderRequest)
+        public async Task<ActionResult<CreateOrderResponseDTO>> CreateOrderFromCart(
+                    [FromBody] CreateOrderRequestDTO orderRequest)
         {
             try
             {
-                var orderId = await _orderService.CreateOrderFromCart(orderRequest.Freight, orderRequest.TotalAmount, orderRequest.CartItemIds, orderRequest.Address);
-                if (orderId == 0)
-                    return BadRequest("Cart is empty or order creation failed.");
-
-                return Ok(orderId);
+                var result = await _orderService.CreateOrderFromCart(orderRequest);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating order. Request: Freight={Freight}, TotalAmount={TotalAmount}, CartItemIds={CartItemIds}, Address={Address}",
-                    orderRequest.Freight, orderRequest.TotalAmount, string.Join(",", orderRequest.CartItemIds), orderRequest.Address);
-                _logger.LogError(ex, "Exception details: {InnerException}", ex.InnerException?.Message ?? "No inner exception");
-                return StatusCode(500, $"Error creating order: {ex.Message}. Inner: {ex.InnerException?.Message ?? "None"}");
+                _logger.LogError(ex, "Error creating order: {@Request}", orderRequest);
+                return StatusCode(500, "Internal server error");
             }
         }
 
