@@ -53,11 +53,21 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddMemoryCache();
 
 // ===== CORS =====
-builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
-    p.AllowAnyOrigin()
-     .AllowAnyHeader()
-     .AllowAnyMethod()
-));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policy =>
+    {
+        policy
+            .WithOrigins(
+                "https://pos-lamtran213-ui.vercel.app",
+                "http://localhost:5173"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // SignalR cần
+    });
+});
+
 
 // ===== JWT Authentication =====
 var accessKey = builder.Configuration["Jwt:AccessSecretKey"]!;
@@ -125,7 +135,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS.Lamtran213 API v1"));
 
-app.UseCors();
+app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
