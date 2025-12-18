@@ -9,6 +9,7 @@
         ICartRepository CartRepository { get; }
         ICartItemRepository CartItemRepository { get; }
         IOrderRepository OrderRepository { get; }
+        IOrderDetailRepository OrderDetailRepository { get; }
         IPaymentRepository PaymentRepository { get; }
         Task<bool> Save();
     }

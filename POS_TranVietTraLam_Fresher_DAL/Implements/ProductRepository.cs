@@ -16,5 +16,17 @@ namespace POS_TranVietTraLam_Fresher_DAL.Implements
         {
             return _context.Products.AsQueryable();
         }
+
+        public async Task<Product> UpdateProductStockAfterPaymentAsync(int productId, int quantityExist)
+        {
+            var product = await _context.Products.FindAsync(productId);
+            if (product != null)
+            {
+                product.UnitsInStock = quantityExist;
+                _context.Products.Update(product);
+                await _context.SaveChangesAsync();
+            }
+            return product;
+        }
     }
 }

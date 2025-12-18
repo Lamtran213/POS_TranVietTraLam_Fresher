@@ -13,6 +13,7 @@ namespace POS_TranVietTraLam_Fresher_DAL.Implements
         public ICartRepository CartRepository { get; }
         public ICartItemRepository CartItemRepository { get; }
         public IOrderRepository OrderRepository { get; }
+        public IOrderDetailRepository OrderDetailRepository { get; }
         public IPaymentRepository PaymentRepository { get; }
         public UnitOfWork(POSContext context, 
             IUserRepository userRepository,
@@ -22,7 +23,8 @@ namespace POS_TranVietTraLam_Fresher_DAL.Implements
             ICartRepository cartRepository,
             IOrderRepository orderRepository,
             ICartItemRepository cartItemRepository,
-            IPaymentRepository paymentRepository)
+            IPaymentRepository paymentRepository,
+            IOrderDetailRepository orderDetailRepository)
         {
             _context = context;
             UserRepository = userRepository;
@@ -33,6 +35,7 @@ namespace POS_TranVietTraLam_Fresher_DAL.Implements
             OrderRepository = orderRepository;
             CartItemRepository = cartItemRepository;
             PaymentRepository = paymentRepository;
+            OrderDetailRepository = orderDetailRepository;
         }
         public async Task<bool> Save()
         {

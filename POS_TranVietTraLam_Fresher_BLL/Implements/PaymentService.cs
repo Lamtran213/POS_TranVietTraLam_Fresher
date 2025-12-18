@@ -71,6 +71,32 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                     ? DateTimeOffset.FromUnixTimeSeconds(payload.paidAt.Value)
                     : DateTimeOffset.UtcNow;
 
+                var orders = await _unitOfWork.OrderDetailRepository.GetOrderWithDetailsAsync(payment.OrderId);
+                if(orders == null)
+                {
+                    Console.WriteLine($"Order not found for PaymentId: {payment.PaymentId}");
+                    return false;
+                }
+
+                foreach(var detail in orders.OrderDetails)
+                {
+                    var product = await _unitOfWork.ProductRepository.GetByIdAsync(detail.ProductId);
+                    if(product == null)
+                    {
+                        Console.WriteLine($"Product not found for ProductId: {detail.ProductId}");
+                        return false;
+                    }
+
+                    if(product.UnitsInStock < detail.Quantity)
+                    {
+                        Console.WriteLine($"Insufficient stock for ProductId: {detail.ProductId}. Available: {product.UnitsInStock}, Required: {detail.Quantity}");
+                        return false;
+                    }
+
+                    product.UnitsInStock -= detail.Quantity;
+                    await _unitOfWork.ProductRepository.UpdateAsync(product);
+                }
+
                 await _unitOfWork.PaymentRepository.MarkPaidAsync(payment.PaymentId, paidAt);
                 await _unitOfWork.OrderRepository.MarkPaidAsync(payment.OrderId, paidAt);
 

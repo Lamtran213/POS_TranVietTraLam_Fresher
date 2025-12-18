@@ -141,13 +141,6 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
             // ===== DELETE CART & UPDATE STOCK =====
             await _unitOfWork.CartItemRepository.DeleteByListIdsAsync(request.CartItemIds);
 
-            foreach (var item in order.OrderDetails)
-            {
-                var product = await _unitOfWork.ProductRepository.GetByIdAsync(item.ProductId);
-                product!.UnitsInStock -= item.Quantity;
-                await _unitOfWork.ProductRepository.UpdateAsync(product);
-            }
-
             await _unitOfWork.Save();
 
             return new CreateOrderResponseDTO
