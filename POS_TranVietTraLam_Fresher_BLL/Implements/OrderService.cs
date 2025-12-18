@@ -79,6 +79,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
 
             var isOnlinePayment = request.PaymentMethod == PaymentMethod.PayOS;
 
+            // ===== CREATE ORDER =====
             var order = new Order
             {
                 UserId = _authenticatedUser.UserId,
@@ -86,7 +87,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 RequiredDate = DateTime.UtcNow.AddDays(5),
                 Freight = request.Freight,
                 TotalAmount = request.TotalAmount,
-                IsPaid = false, 
+                IsPaid = false,
                 OrderStatus = OrderStatus.Pending,
                 Address = request.Address,
                 OrderDetails = cartItems.Select(ci => new OrderDetail
@@ -111,7 +112,15 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 Status = PaymentStatus.Pending
             };
 
+            if (request.PaymentMethod == PaymentMethod.COD)
+            {
+                order.OrderStatus = OrderStatus.Shipping;
+                payment.Status = PaymentStatus.Pending;
+            }
+
             await _unitOfWork.PaymentRepository.AddAsync(payment);
+
+            await _unitOfWork.OrderRepository.UpdateAsync(order);
             await _unitOfWork.Save();
 
             // ===== PAYOS =====
@@ -136,19 +145,26 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
 
                 payment.PayosOrderCode = payosResponse.OrderCode;
                 await _unitOfWork.PaymentRepository.UpdateAsync(payment);
+                await _unitOfWork.Save();
             }
 
-            // ===== DELETE CART & UPDATE STOCK =====
+            // ===== DELETE CART =====
             await _unitOfWork.CartItemRepository.DeleteByListIdsAsync(request.CartItemIds);
-
             await _unitOfWork.Save();
 
+            // ===== RESPONSE =====
             return new CreateOrderResponseDTO
             {
                 OrderId = order.OrderId,
-                PaymentUrl = payosResponse?.CheckoutUrl
+                PaymentUrl = isOnlinePayment ? payosResponse?.CheckoutUrl : null,
+                RedirectUrl = isOnlinePayment
+                    ? null
+                    : $"/order/success?orderId={order.OrderId}",
+                IsPaid = false,
+                PaymentStatus = payment.Status
             };
         }
+
 
         public async Task<OrderResponseDTO> GetById(int orderId)
         {
