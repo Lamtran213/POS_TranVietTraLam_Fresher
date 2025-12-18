@@ -125,8 +125,9 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS.Lamtran213 API v1"));
 
-app.UseHttpsRedirection();
 app.UseCors();
+
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
