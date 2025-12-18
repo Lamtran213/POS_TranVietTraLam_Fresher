@@ -50,6 +50,7 @@ namespace POS_TranVietTraLam_Fresher_DAL.Implements
             var entity = await _dbSet.FirstOrDefaultAsync(p => p.OrderId == orderId);
             if (entity == null) return;
             entity.OrderStatus = OrderStatus.Paid;
+            entity.IsPaid = true;
             entity.PaidAt = paidAt.UtcDateTime;
             await _context.SaveChangesAsync();
         }
