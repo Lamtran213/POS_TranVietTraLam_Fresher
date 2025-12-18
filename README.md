@@ -27,11 +27,23 @@
 
 ## 📌 Tính năng chính
 
-1. **Quản lý sản phẩm:** Thêm, sửa, xoá, và phân loại sản phẩm.  
-2. **Quản lý đơn hàng:** Tạo, xem, cập nhật trạng thái đơn hàng.  
-3. **Quản lý tồn kho:** Kiểm soát số lượng hàng, cảnh báo tồn kho.  
-4. **Người dùng & quyền hạn:** Quản lý Admin và Customer, phân quyền truy cập.  
-5. **API Documentation:** Xem và thử nghiệm API qua Swagger UI.  
+1. Màn hình bán hàng (POS Screen)
+o Hiển thị danh sách sản phẩm (Tên, Giá)
+o Thêm sản phẩm vào giỏ hàng
+o Hiển thị tổng tiền
+o Nút Thanh toán
+2. Khi thanh toán
+o Gửi yêu cầu thanh toán lên Backend
+o Hiển thị thông báo Thanh toán thành công
+
+o Clear giỏ hàng
+3. Màn hình phụ – Realtime Screen
+o Hiển thị danh sách đơn hàng realtime
+o Tự động cập nhật (không cần reload)
+o Mỗi đơn hàng hiển thị:
+ Mã đơn hàng
+ Tổng tiền
+ Thời gian thanh toán
 
 ---
 
