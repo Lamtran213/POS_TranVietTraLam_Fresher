@@ -6,5 +6,6 @@ namespace POS_TranVietTraLam_Fresher_BLL.Defines
     {
         Task<bool> HandlePayOSWebhook(PayosWebhookPayload payload);
         Task<List<AllPaymentDTO>> GetAllPaymentAsync();
+        Task NotifyPaymentChangedAsync();
     }
 }

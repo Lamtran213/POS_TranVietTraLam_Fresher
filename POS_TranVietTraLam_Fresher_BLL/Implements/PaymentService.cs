@@ -1,5 +1,7 @@
-﻿using POS_TranVietTraLam_Fresher_BLL.Defines;
+﻿using Microsoft.AspNetCore.SignalR;
+using POS_TranVietTraLam_Fresher_BLL.Defines;
 using POS_TranVietTraLam_Fresher_BLL.DTO.PaymentDTO;
+using POS_TranVietTraLam_Fresher_BLL.Hubs;
 using POS_TranVietTraLam_Fresher_DAL.Defines;
 using POS_TranVietTraLam_Fresher_Entities.Enum;
 
@@ -9,10 +11,12 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailService _emailService;
-        public PaymentService(IUnitOfWork unitOfWork, IEmailService emailService)
+        private readonly IHubContext<POSHubs> _hubContext;
+        public PaymentService(IUnitOfWork unitOfWork, IEmailService emailService, IHubContext<POSHubs> hubContext)
         {
             _unitOfWork = unitOfWork;
             _emailService = emailService;
+            _hubContext = hubContext;
         }
         public async Task<bool> HandlePayOSWebhook(PayosWebhookPayload payload)
         {
@@ -30,6 +34,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
             }
 
             var payment = await _unitOfWork.PaymentRepository.GetByOrderCodeAsync(actualOrderCode);
+            var order = payment != null ? await _unitOfWork.OrderRepository.GetByIdAsync(payment.OrderId) : null;
             if (payment == null)
             {
                 return true;
@@ -67,31 +72,33 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                     : DateTimeOffset.UtcNow;
 
                 await _unitOfWork.PaymentRepository.MarkPaidAsync(payment.PaymentId, paidAt);
+                await _unitOfWork.OrderRepository.MarkPaidAsync(payment.OrderId, paidAt);
+                await NotifyPaymentChangedAsync();
 
-                    await _unitOfWork.Save();
+                await _unitOfWork.Save();
 
-                    // Gửi email xác nhận thanh toán thành công
-                    var user = await _unitOfWork.UserRepository.GetByIdAsync(payment.UserId);
-                    if (user != null  && !string.IsNullOrWhiteSpace(user.Email))
-                    {
-                        var subject = "Xác nhận thanh toán - POS.Lamtran213";
-                        var html = _emailService.BuildPaymentSuccessEmailHtml(
-                            user: user,
-                            orderCode: payment.PayosOrderCode,
-                            amount: payment.Amount,
-                            createdAt: payment.CreatedAt,
-                            paidAt: paidAt.UtcDateTime
-                        );
-
-                        _ = _emailService.SendEmailAsync(user.Email, subject, html);
-                    }
+                // Gửi email xác nhận thanh toán thành công
+                var user = await _unitOfWork.UserRepository.GetByIdAsync(payment.UserId);
+                if (user != null && !string.IsNullOrWhiteSpace(user.Email))
+                {
+                    var subject = "Xác nhận thanh toán - POS.Lamtran213";
+                    var html = _emailService.BuildPaymentSuccessEmailHtml(
+                        user: user,
+                        orderCode: payment.PayosOrderCode,
+                        amount: payment.Amount,
+                        createdAt: payment.CreatedAt,
+                        paidAt: paidAt.UtcDateTime
+                    );
+                    await _emailService.SendEmailAsync(user.Email, subject, html);
+                }
 
                 return true;
             }
             else if (newStatus == PaymentStatus.Failed || newStatus == PaymentStatus.Cancelled)
             {
                 await _unitOfWork.PaymentRepository.MarkFailedAsync(payment.PaymentId);
-                    await _unitOfWork.Save();
+                await _unitOfWork.Save();
+                await NotifyPaymentChangedAsync();
                 return true;
             }
 
@@ -114,5 +121,28 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
             }).ToList();
             return paymentDTOs;
         }
+
+        public async Task NotifyPaymentChangedAsync()
+        {
+            var payments = await _unitOfWork.PaymentRepository.GetAllWithDetailsAsync();
+
+            var paymentDTOs = payments.Select(p => new AllPaymentDTO
+            {
+                PaymentId = p.PaymentId,
+                PayosOrderCode = p.PayosOrderCode,
+                Amount = p.Amount,
+                Status = p.Status,
+                Method = p.Method,
+                CreatedAt = p.CreatedAt,
+                PaidAt = p.PaidAt,
+                Email = p.User?.Email
+            }).ToList();
+
+            await _hubContext.Clients.All.SendAsync(
+                "PaymentsUpdated",
+                paymentDTOs
+            );
+        }
+
     }
 }

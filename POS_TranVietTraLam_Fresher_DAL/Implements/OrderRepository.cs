@@ -2,6 +2,7 @@
 using POS_TranVietTraLam_Fresher_DAL.Context;
 using POS_TranVietTraLam_Fresher_DAL.Defines;
 using POS_TranVietTraLam_Fresher_Entities.Entity;
+using POS_TranVietTraLam_Fresher_Entities.Enum;
 
 namespace POS_TranVietTraLam_Fresher_DAL.Implements
 {
@@ -42,6 +43,15 @@ namespace POS_TranVietTraLam_Fresher_DAL.Implements
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product)
                 .ToListAsync();
+        }
+
+        public async Task MarkPaidAsync(int orderId, DateTimeOffset paidAt)
+        {
+            var entity = await _dbSet.FirstOrDefaultAsync(p => p.OrderId == orderId);
+            if (entity == null) return;
+            entity.OrderStatus = OrderStatus.Paid;
+            entity.PaidAt = paidAt.UtcDateTime;
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
 using POS_TranVietTraLam_Fresher_BLL.DTO.CommonDTO;
-using POS_TranVietTraLam_Fresher_BLL.Implements;
+using POS_TranVietTraLam_Fresher_BLL.Hubs;
 using POS_TranVietTraLam_Fresher_DAL.Context;
 using POS_TranVietTraLam_Fresher_DAL.Defines;
 using System.Text;
@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ===== Controllers =====
 builder.Services.AddControllers();
-
+builder.Services.AddSignalR();
 // ===== Supabase =====
 var supabaseConfig = builder.Configuration.GetSection("Supabase");
 var url = supabaseConfig["Url"];
@@ -130,7 +130,7 @@ app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapHub<POSHubs>("/posHub");
 app.MapControllers();
 
 app.Run();

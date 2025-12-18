@@ -13,5 +13,6 @@ namespace POS_TranVietTraLam_Fresher_DAL.Defines
         Task<Order?> CreateNewOrder(Order newOrder);
         Task<Order?> GetByOrderId(int orderId);
         Task<IEnumerable<Order>> GetAllWithDetailsAsync();
+        Task MarkPaidAsync(int orderId, DateTimeOffset paidAt);
     }
 }
