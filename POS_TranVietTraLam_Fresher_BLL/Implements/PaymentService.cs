@@ -99,9 +99,9 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
 
                 await _unitOfWork.PaymentRepository.MarkPaidAsync(payment.PaymentId, paidAt);
                 await _unitOfWork.OrderRepository.MarkPaidAsync(payment.OrderId, paidAt);
+                await NotifyPaymentChangedAsync();
 
                 await _unitOfWork.Save();
-                await NotifyPaymentChangedAsync();
 
                 // Gửi email xác nhận thanh toán thành công
                 var user = await _unitOfWork.UserRepository.GetByIdAsync(payment.UserId);
