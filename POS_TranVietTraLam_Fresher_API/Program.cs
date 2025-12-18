@@ -64,7 +64,7 @@ builder.Services.AddCors(options =>
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // SignalR cần
+            .AllowCredentials(); 
     });
 });
 
@@ -134,7 +134,7 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS.Lamtran213 API v1"));
-
+app.UseRouting();
 app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
