@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using POS_TranVietTraLam_Fresher_BLL.Constants;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
 using POS_TranVietTraLam_Fresher_BLL.DTO.CommonDTO;
 using POS_TranVietTraLam_Fresher_BLL.DTO.ProductDTO;
@@ -28,7 +29,7 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
                 return new ApiResponse<AddProductResponse>
                 {
                     Success = true,
-                    Message = "Product added successfully.",
+                    Message = ProductMessage.ProductAddedSuccess,
                     Data = response,
                     Timestamp = DateTime.UtcNow
                 };
@@ -58,7 +59,7 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
                 return new ApiResponse<PagedResult<GetProductResponse>>
                 {
                     Success = true,
-                    Message = "Products retrieved successfully.",
+                    Message = ProductMessage.ProductRetrievedSuccess,
                     Data = products,
                     Timestamp = DateTime.UtcNow
                 };

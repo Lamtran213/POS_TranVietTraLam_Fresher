@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using POS_TranVietTraLam_Fresher_BLL.Constants;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
 using POS_TranVietTraLam_Fresher_BLL.DTO.CommonDTO;
 using POS_TranVietTraLam_Fresher_BLL.DTO.OrderDTO;
@@ -62,7 +63,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
             var order = await _unitOfWork.OrderRepository.GetByUserIdAsync(userId);
             if (order == null)
             {
-                throw new Exception("Order not found for the user.");
+                throw new Exception(OrderMessage.ORDER_NOT_FOUND);
             }
 
             var result = order.Select(o => MapOrderToDto(o));
@@ -75,7 +76,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 .GetByListIdsAsync(request.CartItemIds);
 
             if (!cartItems.Any())
-                throw new InvalidOperationException("Cart is empty");
+                throw new InvalidOperationException(OrderMessage.CART_IS_EMPTY);
 
             var isOnlinePayment = request.PaymentMethod == PaymentMethod.PayOS;
 
@@ -250,7 +251,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
             var member = await _unitOfWork.UserRepository.GetByIdAsync(memberId);
             if (member == null)
             {
-                throw new Exception("Member not found.");
+                throw new Exception(OrderMessage.CART_IS_EMPTY);
             }
 
             return member.Email;

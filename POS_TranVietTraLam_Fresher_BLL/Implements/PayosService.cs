@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Net.payOS;
 using Net.payOS.Types;
+using POS_TranVietTraLam_Fresher_BLL.Constants;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
 using POS_TranVietTraLam_Fresher_BLL.DTO.CommonDTO;
 using static POS_TranVietTraLam_Fresher_BLL.DTO.PayosDTO.PayosDTOs;
@@ -39,7 +40,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
 
             if (response == null || string.IsNullOrEmpty(response.checkoutUrl))
             {
-                throw new InvalidOperationException("PayOS failed to create payment link");
+                throw new InvalidOperationException(PayosMessage.FailedToCreatePaymentLink);
             }
 
             return new PayOSPaymentResponse

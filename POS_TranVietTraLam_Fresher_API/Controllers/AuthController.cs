@@ -140,7 +140,7 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
                 return StatusCode(ResponseCodes.StatusCodes.CREATED, new ApiResponse<bool>
                 {
                     Success = true,
-                    Message = "Đăng ký thành công! Tài khoản của bạn đã được tạo.",
+                    Message = AuthMessage.REGISTER_SUCCESS,
                     Data = true
                 });
             }
@@ -175,7 +175,7 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
                 return StatusCode(ResponseCodes.StatusCodes.OK, new ApiResponse<LoginResponseDTO>
                 {
                     Success = true,
-                    Message = "Google login thành công",
+                    Message = AuthMessage.LOGIN_GOOGLE_SUCCESS,
                     Data = response
                 });
             }

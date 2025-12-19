@@ -1,15 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using POS_TranVietTraLam_Fresher_BLL.Constants;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
 using POS_TranVietTraLam_Fresher_BLL.DTO.CommonDTO;
 using POS_TranVietTraLam_Fresher_Entities.Entity;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace POS_TranVietTraLam_Fresher_BLL.Implements
 {
@@ -52,7 +49,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                     return new ApiResponse<bool>
                     {
                         Success = true,
-                        Message = "Email sent successfully",
+                        Message = EmailMessage.EMAIL_SENT_SUCCESS,
                         Data = true
                     };
                 }
@@ -63,7 +60,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                     return new ApiResponse<bool>
                     {
                         Success = false,
-                        Message = $"Failed to send email: {response.StatusCode}",
+                        Message = $"{EmailMessage.EMAIL_SENT_FAILED}: {response.StatusCode}",
                         Data = false
                     };
                 }
@@ -74,7 +71,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 return new ApiResponse<bool>
                 {
                     Success = false,
-                    Message = $"Error sending email: {ex.Message}",
+                    Message = $"{EmailMessage.EMAIL_SENT_FAILED} {ex.Message}",
                     Data = false
                 };
             }

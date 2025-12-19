@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using POS_TranVietTraLam_Fresher_BLL.Constants;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
 using POS_TranVietTraLam_Fresher_BLL.DTO.CategoryDTO;
 using POS_TranVietTraLam_Fresher_BLL.DTO.CommonDTO;
@@ -26,7 +27,7 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
                     return new ApiResponse<AddCategoryResponse>
                     {
                         Success = true,
-                        Message = "Category added successfully.",
+                        Message = CategoryMessage.CategoryAddedSuccess,
                         Data = response,
                         Timestamp = DateTime.UtcNow
                     };
@@ -36,7 +37,7 @@ namespace POS_TranVietTraLam_Fresher_API.Controllers
                     return new ApiResponse<AddCategoryResponse>
                     {
                         Success = false,
-                        Message = "Failed to add category.",
+                        Message = CategoryMessage.CategoryAddFailed,
                         Data = null,
                         Timestamp = DateTime.UtcNow
                     };

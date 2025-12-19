@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using POS_TranVietTraLam_Fresher_BLL.Constants;
 using POS_TranVietTraLam_Fresher_BLL.Defines;
 using POS_TranVietTraLam_Fresher_BLL.DTO.CommonDTO;
 using POS_TranVietTraLam_Fresher_DAL.Defines;
@@ -38,7 +39,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                     return new ApiResponse<bool>
                     {
                         Success = false,
-                        Message = "Bạn đã gửi quá nhiều mã xác thực. Vui lòng thử lại sau 1 giờ.",
+                        Message = OtpMessage.OtpSentManyTimes,
                         Data = false
                     };
                 }
@@ -73,7 +74,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                     return new ApiResponse<bool>
                     {
                         Success = false,
-                        Message = "Không thể gửi email xác thực. Vui lòng thử lại.",
+                        Message = OtpMessage.FailedToSendOtp,
                         Data = false
                     };
                 }
@@ -83,7 +84,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 return new ApiResponse<bool>
                 {
                     Success = true,
-                    Message = "Mã xác thực đã được gửi đến email của bạn.",
+                    Message = OtpMessage.OtpHasBeenSent,
                     Data = true
                 };
             }
@@ -93,7 +94,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 return new ApiResponse<bool>
                 {
                     Success = false,
-                    Message = "Có lỗi xảy ra khi gửi mã xác thực.",
+                    Message = OtpMessage.OtpHasBeenErrorForSomeReason,
                     Data = false
                 };
             }
@@ -205,7 +206,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                     return new ApiResponse<bool>
                     {
                         Success = false,
-                        Message = "Mã xác thực không hợp lệ hoặc đã hết hạn.",
+                        Message = OtpMessage.OtpInvalid,
                         Data = false
                     };
                 }
@@ -220,7 +221,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 return new ApiResponse<bool>
                 {
                     Success = true,
-                    Message = "Xác thực thành công.",
+                    Message = OtpMessage.OtpVerifiedSuccess,
                     Data = true
                 };
             }
@@ -230,7 +231,7 @@ namespace POS_TranVietTraLam_Fresher_BLL.Implements
                 return new ApiResponse<bool>
                 {
                     Success = false,
-                    Message = "Có lỗi xảy ra khi xác thực mã.",
+                    Message = OtpMessage.OtpHasBeenErrorForSomeReason,
                     Data = false
                 };
             }

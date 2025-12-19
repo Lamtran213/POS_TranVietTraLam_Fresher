@@ -5,6 +5,7 @@
         // Login messages
         public const string LOGIN_FAILED = "Email hoặc mật khẩu không hợp lệ";
         public const string LOGIN_SUCCESS = "Đăng nhập thành công";
+        public const string LOGIN_GOOGLE_SUCCESS = "Đăng nhập Google thành công";
         public const string LOGIN_USER_NOT_FOUND = "Không tìm thấy người dùng với email đã cung cấp";
         public const string LOGIN_USER_NOT_ACTIVE = "Tài khoản người dùng bị chặn";
 
